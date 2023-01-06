@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive TZ=Europe/London
 
 RUN apt-get update && \
@@ -11,8 +11,8 @@ RUN apt-get update && \
 RUN cd /opt && \
     git clone --depth=1 https://github.com/emscripten-core/emsdk.git && \
     cd emsdk && \
-    ./emsdk install "3.1.14" && \
-    ./emsdk activate "3.1.14"
+    ./emsdk install "3.1.29" && \
+    ./emsdk activate "3.1.29"
 
 RUN cd /opt/emsdk && \
     . "/opt/emsdk/emsdk_env.sh" && \
