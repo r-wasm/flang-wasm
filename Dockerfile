@@ -5,8 +5,11 @@ RUN apt-get update && \
     apt-get -y install --no-install-recommends build-essential curl wget git \
         make cmake ca-certificates python3 quilt liblzma-dev libpcre2-dev \
         llvm clang gfortran libz-dev libbz2-dev libcurl4-openssl-dev && \
+        r-base libxml2-dev libssl-dev && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
+
+RUN R -e "install.packages(c('rvest', 'rmarkdown'))"
 
 RUN cd /opt && \
     git clone --depth=1 https://github.com/emscripten-core/emsdk.git && \
