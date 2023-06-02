@@ -4,8 +4,8 @@ ENV DEBIAN_FRONTEND=noninteractive TZ=Europe/London
 RUN apt-get update && \
     apt-get -y install --no-install-recommends build-essential curl wget git \
         make cmake ca-certificates python3 quilt liblzma-dev libpcre2-dev \
-        llvm clang gfortran libz-dev libbz2-dev libcurl4-openssl-dev && \
-        r-base libxml2-dev libssl-dev gperf libglib2.0-dev-bin && \
+        llvm clang gfortran libz-dev libbz2-dev libcurl4-openssl-dev \
+        r-base libxml2-dev libssl-dev gperf libglib2.0-dev-bin sqlite3 && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 
