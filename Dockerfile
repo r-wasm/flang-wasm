@@ -14,8 +14,8 @@ RUN R -e "install.packages(c('rvest', 'rmarkdown'))"
 RUN cd /opt && \
     git clone --depth=1 https://github.com/emscripten-core/emsdk.git && \
     cd emsdk && \
-    ./emsdk install "3.1.29" && \
-    ./emsdk activate "3.1.29"
+    ./emsdk install "3.1.37" && \
+    ./emsdk activate "3.1.37"
 
 RUN cd /opt/emsdk && \
     . "/opt/emsdk/emsdk_env.sh" && \
