@@ -1,38 +1,40 @@
 FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive TZ=Europe/London
+ARG EMSCRIPTEN_VERSION=3.1.37
 
+# Install prerequisites
 RUN apt-get update && \
-    apt-get -y install --no-install-recommends build-essential curl wget git \
-        make cmake ca-certificates python3 quilt liblzma-dev libpcre2-dev \
-        llvm clang gfortran libz-dev libbz2-dev libcurl4-openssl-dev \
-        r-base libxml2-dev libssl-dev gperf libglib2.0-dev-bin sqlite3 && \
-    apt clean && \
+    apt-get -y install --no-install-recommends build-essential ca-certificates \
+        cmake git python3 && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN R -e "install.packages(c('rvest', 'rmarkdown'))"
+# Install emsdk
+RUN git clone --depth=1 https://github.com/emscripten-core/emsdk.git /opt/emsdk
+WORKDIR /opt/emsdk
+RUN ./emsdk install "${EMSCRIPTEN_VERSION}" && \
+    ./emsdk activate "${EMSCRIPTEN_VERSION}"
 
-RUN cd /opt && \
-    git clone --depth=1 https://github.com/emscripten-core/emsdk.git && \
-    cd emsdk && \
-    ./emsdk install "3.1.37" && \
-    ./emsdk activate "3.1.37"
+# Build and install webR's patched LLVM flang
+RUN git clone --depth=1 https://github.com/r-wasm/webr.git /tmp/webr
+RUN . "/opt/emsdk/emsdk_env.sh" && \
+    cd /tmp/webr/tools/flang && \
+    make && make install
 
-RUN cd /opt/emsdk && \
-    . "/opt/emsdk/emsdk_env.sh" && \
-    cd /tmp && \
-    git clone --depth=1 https://github.com/georgestagg/webR.git && \
-    cd /tmp/webR/tools/flang && make
-
-RUN cd /tmp/webR/tools/flang && make install
-
+# Copy LLVM flang binaries into /opt/flang
 RUN mkdir /opt/flang && \
-    mv /tmp/webR/host /opt/flang/host && \
-    mv /tmp/webR/wasm /opt/flang/wasm && \
-    mv /tmp/webR/tools/flang/emfc /opt/flang/emfc && \
-    sed -i 's/\/tmp\/webR\/host\/bin/\/opt\/flang\/host\/bin/g' /opt/flang/emfc && \
-    rm -rf /tmp/webR
+    mv /tmp/webr/host /opt/flang/host && \
+    mv /tmp/webr/wasm /opt/flang/wasm && \
+    rm /opt/flang/host/bin/emfc && \
+    strip --strip-unneeded /opt/flang/host/bin/*
 
-WORKDIR /opt
+# Setup emfc helper script
+RUN cp /tmp/webr/tools/flang/emfc.in /opt/flang/emfc && \
+    sed -i 's|@BIN_PATH@|\/opt\/flang\/host\/bin|' /opt/flang/emfc && \
+    chmod +x /opt/flang/emfc
+
+# Cleanup
+RUN rm -rf /tmp/webr
 
 SHELL ["/bin/bash", "-c"]
 
