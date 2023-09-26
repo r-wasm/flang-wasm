@@ -1,4 +1,5 @@
-FROM ubuntu:22.04
+ARG BASE=ubuntu:22.04
+FROM $BASE
 ENV DEBIAN_FRONTEND=noninteractive TZ=Europe/London
 ARG EMSCRIPTEN_VERSION=3.1.37
 
@@ -37,7 +38,8 @@ RUN cp /tmp/webr/tools/flang/emfc.in /opt/flang/emfc && \
 RUN . "/opt/emsdk/emsdk_env.sh" && emcc --clear-cache
 RUN rm -rf /tmp/webr /opt/emsdk/downloads/*-wasm-binaries.tbz2
 
-FROM ubuntu:22.04
+# Squash docker image layers
+FROM $BASE
 COPY --from=0 / /
 SHELL ["/bin/bash", "-c"]
 
