@@ -34,7 +34,10 @@ RUN cp /tmp/webr/tools/flang/emfc.in /opt/flang/emfc && \
     chmod +x /opt/flang/emfc
 
 # Cleanup
-RUN rm -rf /tmp/webr
+RUN . "/opt/emsdk/emsdk_env.sh" && emcc --clear-cache
+RUN rm -rf /tmp/webr /opt/emsdk/downloads/*-wasm-binaries.tbz2
 
+FROM ubuntu:22.04
+COPY --from=0 / /
 SHELL ["/bin/bash", "-c"]
 
