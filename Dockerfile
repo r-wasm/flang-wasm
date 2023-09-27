@@ -1,6 +1,6 @@
 ARG BASE=ubuntu:22.04
 FROM $BASE
-ENV DEBIAN_FRONTEND=noninteractive TZ=Europe/London
+ENV DEBIAN_FRONTEND=noninteractive TZ=UTC
 ARG EMSCRIPTEN_VERSION=3.1.37
 
 # Install prerequisites
@@ -40,6 +40,7 @@ RUN rm -rf /tmp/webr /opt/emsdk/downloads/*-wasm-binaries.tbz2
 
 # Squash docker image layers
 FROM $BASE
+ENV DEBIAN_FRONTEND=noninteractive TZ=UTC
 COPY --from=0 / /
 SHELL ["/bin/bash", "-c"]
 
