@@ -3,10 +3,13 @@ FROM $BASE
 ENV DEBIAN_FRONTEND=noninteractive TZ=UTC
 ARG EMSCRIPTEN_VERSION=3.1.37
 
-# Install prerequisites
+# Install prerequisites for building LLVM, R, and webR wasm system libraries
 RUN apt-get update && \
     apt-get -y install --no-install-recommends build-essential ca-certificates \
-        cmake git python3 && \
+        clang cmake curl gfortran git gnupg gperf libbz2-dev \
+        libcurl4-openssl-dev libglib2.0-dev-bin libz-dev liblzma-dev \
+        libpcre2-dev libssl-dev libxml2-dev pkg-config python3 quilt sqlite3 \
+        tzdata unzip wget && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
