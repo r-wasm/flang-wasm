@@ -12,7 +12,7 @@ The `/opt/flang/wasm/` directory contains a pre-built Fortran runtime library, c
 
 ## What is this Docker image used for?
 
-This image is used as part of the CI infrastructure for webR, implemented through GitHub Actions. Compiling LLVM takes a long time and requires relatively heavy computational resources. By building LLVM independently in a Docker image, the result is cached and there is no need to rebuild LLVM every time a new commit is made to the webR repository.
+This image is used as part of the CI infrastructure for webR, implemented through GitHub Actions. Compiling LLVM takes a long time and requires heavier computational resources than provided by GitHub. By building LLVM independently in a Docker image, the result is cached and there is no need to rebuild LLVM every time a new commit is made to the webR repository.
 
 ## Do I need this image to build webR?
 
@@ -20,4 +20,4 @@ The tools in this image can be used to shorten the time needed to build webR, as
 
 ## Can I use this image to build WebAssembly packages for webR?
 
-No, this image does not contain a version of R configured for use with WebAssembly, which is required to build R packages. Instead either first build webR from source, or use a Docker image containing a fully pre-built version of webR. This image is only useful for building webR itself.
+No, this image does not contain a version of R configured for use with WebAssembly, which is required to build R packages. Either build webR from source, or use a [Docker image containing a fully pre-built version of webR](https://github.com/r-wasm/webr#building-with-docker). This image is only useful for building webR itself.
