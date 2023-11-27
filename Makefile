@@ -60,8 +60,10 @@ $(BUILD)%.o : $(SOURCE)%.cpp
 
 .PHONY: install
 install: $(FLANG_BIN) $(RUNTIME_LIB)
-	install -D -t $(HOST)/bin -m 755 $(FLANG_BIN)
-	install -D -t $(WASM)/lib -m 644 $(RUNTIME_LIB)
+	mkdir -p $(HOST)/bin
+	mkdir -p $(WASM)/lib
+	install -m 755 $(FLANG_BIN) $(HOST)/bin
+	install -m 644 $(RUNTIME_LIB) $(WASM)/lib
 
 .PHONY: check
 check:
