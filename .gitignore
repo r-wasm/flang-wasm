@@ -1,3 +1,4 @@
 .emscripten_cache-*
 /llvm-project
 /result
+/build
