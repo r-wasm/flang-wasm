@@ -1,23 +1,23 @@
-# LLVM Flang for webR
+# LLVM Flang for WebAssembly
 
-This docker image contains a patched version of LLVM's `flang` compiler suite. The included tools can be used to compile Fortran sources for WebAssembly. Also included is a pre-built Fortran runtime library, compiled for WebAssembly using Emscripten.
+This repository contains tools to build a patched version of [LLVM's](https://llvm.org) `flang-new` compiler that can be used to compile Fortran sources for WebAssembly. A pre-built Fortran runtime library is also built for WebAssembly using [Emscripten](https://emscripten.org).
 
 ## What's included
 
-The `/opt/flang/host/bin/` directory contains the LLVM compiler binaries, stripped of debug symbols.
+* A `Makefile` that downloads, builds and installs the `flang-new` compiler from a [patched LLVM](https://github.com/r-wasm/llvm-project) source. Use the `PREFIX` make variable to control the installation directory (default, `"."`). Once installed, the `$(PREFIX)/host/bin/` directory will contain `flang-new`. The `$(PREFIX)/wasm/` directory will contain a pre-built Fortran runtime library compiled for WebAssembly, for use with Emscripten.
 
-The helper script `/opt/flang/emfc` is to Fortran what Emscripten's `emcc` is to C. It takes in Fortran sources and outputs object binaries, with an optional linking step using `wasm-ld`.
+* A `Dockerfile`, which can be used to build a Docker container with LLVM Flang and the WebAssembly Fortran runtime library installed under the directory `/opt/flang`.
 
-The `/opt/flang/wasm/` directory contains a pre-built Fortran runtime library, compiled for WebAssembly using Emscripten.
+* A Nix flake file, `flake.nix`, which can be used to build LLVM Flang and the WebAssembly Fortran runtime library as a Nix package.
 
-## What is this Docker image used for?
+## What is this project used for?
 
-This image is used as part of the CI infrastructure for webR, implemented through GitHub Actions. Compiling LLVM takes a long time and requires heavier computational resources than provided by GitHub. By building LLVM independently in a Docker image, the result is cached and there is no need to rebuild LLVM every time a new commit is made to the webR repository.
+The `flang-new` compiler is used as part of the build process for [webR](https://webr.r-wasm.org) to compile Fortran sources for WebAssembly. Compiling LLVM takes a long time and is fairly resource intensive. By building LLVM independently with a Docker container and/or Nix package, the result is cached and improves the performance of webR's CI scripts.
 
-## Do I need this image to build webR?
+### Do I need this package to build webR?
 
-The tools in this image can be used to shorten the time needed to build webR, as in webR's GitHub Actions scripts, but it is not required. WebR will build LLVM from source if it cannot find the Fortran compiler tools in the build tree.
+Downloading this project as a Docker container or Nix package can shorten the time needed to build webR, but it is not required. WebR will compile LLVM from source in the build tree if it is not provided with Fortran compiler tools.
 
-## Can I use this image to build WebAssembly packages for webR?
+### Can I use this project to build WebAssembly packages for webR?
 
-No, this image does not contain a version of R configured for use with WebAssembly, which is required to build R packages. Either build webR from source, or use a [Docker image containing a fully pre-built version of webR](https://github.com/r-wasm/webr#building-with-docker). This image is only useful for building webR itself.
+No, this project does not contain a version of R configured for use with WebAssembly, which is required to build R packages. To build R packages, either build [webR](https://github.com/r-wasm/webr) from source, or use a [Docker image containing a fully pre-built version of webR](https://github.com/r-wasm/webr#building-with-docker).
