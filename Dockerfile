@@ -42,7 +42,8 @@ RUN ./emsdk install "${EMSCRIPTEN_VERSION}" && \
 COPY Makefile /root/flang-wasm/Makefile
 RUN . "/opt/emsdk/emsdk_env.sh" && \
     cd "/root/flang-wasm" && \
-    make PREFIX="/opt/flang" && \
+    make PREFIX="/opt/flang" FLANG_WASM_CMAKE_VARS="-DCMAKE_C_COMPILER=clang \
+        -DCMAKE_CXX_COMPILER=clang++ -DLLVM_USE_LINKER=lld" && \
     make PREFIX="/opt/flang" install
 
 # Clean up

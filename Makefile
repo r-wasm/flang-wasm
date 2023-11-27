@@ -35,12 +35,9 @@ $(FLANG_BIN): $(SOURCE)
 	cmake -G Ninja -S $(SOURCE)/llvm -B $(BUILD) \
 	  -DCMAKE_INSTALL_PREFIX=$(HOST) \
 	  -DCMAKE_BUILD_TYPE=MinSizeRel \
-	  -DCMAKE_C_COMPILER=clang \
-	  -DCMAKE_CXX_COMPILER=clang++ \
 	  -DLLVM_DEFAULT_TARGET_TRIPLE="wasm32-unknown-emscripten" \
 	  -DLLVM_TARGETS_TO_BUILD="WebAssembly" \
 	  -DLLVM_ENABLE_PROJECTS="clang;flang;mlir" \
-	  -DLLVM_USE_LINKER=lld \
 	  $(FLANG_WASM_CMAKE_VARS)
 	TERM=dumb cmake --build $(BUILD)
 	$(MAKE) wasm-runtime

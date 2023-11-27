@@ -62,7 +62,10 @@
             export EM_CACHE=$(pwd)/.emscripten_cache-${pkgs-emscripten.emscripten.version}
             echo emscripten cache dir: $EM_CACHE
 
-            CMAKE_BUILD_PARALLEL_LEVEL=$NIX_BUILD_CORES make SOURCE=${flang-source} PREFIX=$out
+            CMAKE_BUILD_PARALLEL_LEVEL=$NIX_BUILD_CORES make \
+              SOURCE=${flang-source} \
+              PREFIX=$out \
+              FLANG_WASM_CMAKE_VARS="-DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DLLVM_USE_LINKER=lld"
           '';
 
           installPhase = ''
