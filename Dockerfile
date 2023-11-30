@@ -1,7 +1,7 @@
 ARG BASE=ubuntu:22.04
 FROM $BASE
 ENV DEBIAN_FRONTEND=noninteractive TZ=UTC
-ARG EMSCRIPTEN_VERSION=3.1.45
+ARG EMSCRIPTEN_VERSION=3.1.47
 
 # Install prerequisites for building LLVM, R, and webR wasm system libraries
 RUN apt-get update && apt-get -y install --no-install-recommends \

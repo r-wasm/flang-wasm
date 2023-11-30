@@ -2,14 +2,10 @@
   description = "LLVM Flang for WebAssembly";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.05";
-    # Use this commit to get Emscripten 3.1.45
-    # See https://www.nixhub.io/packages/emscripten
-    nixpkgs-emscripten.url =
-      "github:NixOS/nixpkgs/75a52265bda7fd25e06e3a67dee3f0354e73243c";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-emscripten }:
+  outputs = { self, nixpkgs }:
     let
       allSystems =
         [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
@@ -19,7 +15,6 @@
         nixpkgs.lib.genAttrs allSystems (system:
           f {
             pkgs = import nixpkgs { inherit system; };
-            pkgs-emscripten = import nixpkgs-emscripten { inherit system; };
             inherit system;
 
             flang-source = nixpkgs.legacyPackages.${system}.fetchgit {
@@ -31,7 +26,7 @@
           });
 
     in {
-      packages = forAllSystems ({ pkgs, pkgs-emscripten, flang-source, ... }: {
+      packages = forAllSystems ({ pkgs, flang-source, ... }: {
         default = pkgs.stdenv.mkDerivation {
           name = "flang-wasm";
           src = ./.;
@@ -39,6 +34,7 @@
           nativeBuildInputs = with pkgs; [
             cacert # Needed for git clone to work on https repos
             cmake
+            emscripten
             git
             libxml2
             llvmPackages_16.bintools
@@ -48,18 +44,16 @@
             zlib
           ];
 
-          propagatedNativeBuildInputs = [ pkgs-emscripten.emscripten ];
-
           # The automatic configuration by stdenv.mkDerivation tries to do some
           # cmake configuration, which causes the build to fail.
           dontConfigure = true;
 
           buildPhase = ''
-            if [ ! -d $(pwd)/.emscripten_cache-${pkgs-emscripten.emscripten.version} ]; then
-              cp -R ${pkgs-emscripten.emscripten}/share/emscripten/cache/ $(pwd)/.emscripten_cache-${pkgs-emscripten.emscripten.version}
-              chmod u+rwX -R $(pwd)/.emscripten_cache-${pkgs-emscripten.emscripten.version}
+            if [ ! -d $(pwd)/.emscripten_cache-${pkgs.emscripten.version} ]; then
+              cp -R ${pkgs.emscripten}/share/emscripten/cache/ $(pwd)/.emscripten_cache-${pkgs.emscripten.version}
+              chmod u+rwX -R $(pwd)/.emscripten_cache-${pkgs.emscripten.version}
             fi
-            export EM_CACHE=$(pwd)/.emscripten_cache-${pkgs-emscripten.emscripten.version}
+            export EM_CACHE=$(pwd)/.emscripten_cache-${pkgs.emscripten.version}
             echo emscripten cache dir: $EM_CACHE
 
             CMAKE_BUILD_PARALLEL_LEVEL=$NIX_BUILD_CORES make \
@@ -75,7 +69,7 @@
       });
 
       # Development environment output
-      devShells = forAllSystems ({ pkgs, pkgs-emscripten, system, ... }: {
+      devShells = forAllSystems ({ pkgs, system, ... }: {
         default = pkgs.mkShell {
 
           # Get the nativeBuildInputs from packages.default
@@ -97,11 +91,11 @@
           # widespread use, we'll be able to use
           # https://github.com/NixOS/nix/issues/8034
           shellHook = ''
-            if [ ! -d $(pwd)/.emscripten_cache-${pkgs-emscripten.emscripten.version} ]; then
-              cp -R ${pkgs-emscripten.emscripten}/share/emscripten/cache/ $(pwd)/.emscripten_cache-${pkgs-emscripten.emscripten.version}
-              chmod u+rwX -R $(pwd)/.emscripten_cache-${pkgs-emscripten.emscripten.version}
+            if [ ! -d $(pwd)/.emscripten_cache-${pkgs.emscripten.version} ]; then
+              cp -R ${pkgs.emscripten}/share/emscripten/cache/ $(pwd)/.emscripten_cache-${pkgs.emscripten.version}
+              chmod u+rwX -R $(pwd)/.emscripten_cache-${pkgs.emscripten.version}
             fi
-            export EM_CACHE=$(pwd)/.emscripten_cache-${pkgs-emscripten.emscripten.version}
+            export EM_CACHE=$(pwd)/.emscripten_cache-${pkgs.emscripten.version}
             echo emscripten cache dir: $EM_CACHE
           '';
         };
