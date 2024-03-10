@@ -26,7 +26,7 @@ download: $(SOURCE)
 wasm-runtime: $(RUNTIME_LIB)
 
 $(SOURCE):
-	git clone --single-branch -b webr --depth=1 https://github.com/r-wasm/llvm-project
+	git clone --single-branch -b wasm --depth=1 https://github.com/r-wasm/llvm-project
 
 .PHONY: flang
 flang: $(FLANG_BIN)
