@@ -1,4 +1,4 @@
-name: Build flang-wasm
+name: Build and publish flang-wasm
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-and-publish-docker:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
@@ -32,7 +32,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
   build-and-cache-nix:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main

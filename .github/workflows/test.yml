@@ -1,0 +1,29 @@
+name: Build flang-wasm
+
+on:
+  pull_request:
+    branches:
+      - "main"
+      - "dev"
+  workflow_dispatch:
+
+jobs:
+  build-docker:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          load: true
+  build-nix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - name: Build Nix package
+        run: nix build --print-build-logs
