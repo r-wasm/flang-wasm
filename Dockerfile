@@ -1,4 +1,4 @@
-ARG BASE=ubuntu:22.04
+ARG BASE=ubuntu:24.04
 FROM $BASE
 ENV DEBIAN_FRONTEND=noninteractive TZ=UTC
 ARG EMSCRIPTEN_VERSION=3.1.47
@@ -28,6 +28,7 @@ RUN apt-get update && apt-get -y install --no-install-recommends \
     ninja-build \
     pkg-config \
     python3 \
+    python3-setuptools \
     quilt \
     sqlite3 \
     sudo \
