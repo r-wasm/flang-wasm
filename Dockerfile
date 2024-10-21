@@ -50,6 +50,9 @@ RUN . /opt/emsdk/emsdk_env.sh && \
         -DCMAKE_CXX_COMPILER=clang++ -DLLVM_USE_LINKER=lld" && \
     make PREFIX="/opt/flang" install
 
+# Install LLVM flang
+RUN cd /root/flang-wasm && make PREFIX="/opt/flang" install
+
 # Clean up
 RUN . /opt/emsdk/emsdk_env.sh && emcc --clear-cache
 RUN rm -rf /root/flang-wasm /opt/emsdk/downloads/*

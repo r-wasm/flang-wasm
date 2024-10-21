@@ -7,6 +7,7 @@ HOST = $(PREFIX)/host
 WASM = $(PREFIX)/wasm
 
 FLANG_BIN = $(BUILD)/bin/flang-new
+FLANG_INCLUDE = $(BUILD)/include/flang
 
 RUNTIME_SOURCES := $(wildcard $(SOURCE)/flang/runtime/*.cpp)
 RUNTIME_SOURCES += $(SOURCE)/flang/lib/Decimal/decimal-to-binary.cpp
@@ -61,9 +62,11 @@ $(BUILD)%.o : $(SOURCE)%.cpp
 .PHONY: install
 install: $(FLANG_BIN) $(RUNTIME_LIB)
 	mkdir -p $(HOST)/bin
+	mkdir -p $(HOST)/include/flang
 	mkdir -p $(WASM)/lib
 	install -m 755 $(FLANG_BIN) $(HOST)/bin
 	install -m 644 $(RUNTIME_LIB) $(WASM)/lib
+	find $(FLANG_INCLUDE) -type f -exec install -m 644 {} $(HOST)/include/flang ';'
 
 .PHONY: check
 check:
