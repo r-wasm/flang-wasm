@@ -39,6 +39,7 @@ $(FLANG_BIN): $(SOURCE)
 	  -DLLVM_DEFAULT_TARGET_TRIPLE="wasm32-unknown-emscripten" \
 	  -DLLVM_TARGETS_TO_BUILD="WebAssembly" \
 	  -DLLVM_ENABLE_PROJECTS="clang;flang;mlir" \
+	  -DFLANG_INCLUDE_TESTS=OFF \
 	  $(FLANG_WASM_CMAKE_VARS)
 	TERM=dumb cmake --build $(BUILD)
 	$(MAKE) wasm-runtime

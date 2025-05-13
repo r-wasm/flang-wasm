@@ -2,7 +2,7 @@
   description = "LLVM Flang for WebAssembly";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
   };
 
   outputs = { self, nixpkgs }:
@@ -20,8 +20,8 @@
             flang-source = nixpkgs.legacyPackages.${system}.fetchgit {
               url = "https://github.com/r-wasm/llvm-project";
               # This is the tip of the wasm branch.
-              rev = "dd6047a18c5fc1c84978d141c5d820cf28e3c952";
-              hash = "sha256-iQ7GIFkzATKmTOzJB72ydQQZGcQnp2g29qR5tG7pLqw=";
+              rev = "5892855d8a10e3d0bcce9b3b05513b4f2324c275";
+              hash = "sha256-2QY7/cdtLkSfjTQ/XrTYGtEp6uoqzt/5Is8GF2JRX2A=";
             };
           });
 
