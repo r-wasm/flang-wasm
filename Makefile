@@ -6,7 +6,7 @@ PREFIX = $(ROOT)
 HOST = $(PREFIX)/host
 WASM = $(PREFIX)/wasm
 
-FLANG_BIN = $(BUILD)/bin/flang-new
+FLANG_BIN = $(BUILD)/bin/flang
 FLANG_INCLUDE = $(BUILD)/include/flang
 
 RUNTIME_SOURCES := $(wildcard $(SOURCE)/flang/runtime/*.cpp)
