@@ -2,7 +2,7 @@
   description = "LLVM Flang for WebAssembly";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
   };
 
   outputs = { self, nixpkgs }:
@@ -20,7 +20,7 @@
             flang-source = nixpkgs.legacyPackages.${system}.fetchgit {
               url = "https://github.com/r-wasm/llvm-project";
               # This is the tip of the wasm branch.
-              rev = "5892855d8a10e3d0bcce9b3b05513b4f2324c275";
+              rev = "e3da0a873ea32bca563c2cccdd4d7622b13cef50";
               hash = "sha256-2QY7/cdtLkSfjTQ/XrTYGtEp6uoqzt/5Is8GF2JRX2A=";
             };
           });
@@ -29,7 +29,7 @@
       packages = forAllSystems ({ pkgs, flang-source, ... }: {
         default = pkgs.stdenv.mkDerivation {
           name = "flang-wasm";
-          src = ./.;
+          src = self;
 
           nativeBuildInputs = with pkgs; [
             cacert # Needed for git clone to work on https repos
@@ -37,8 +37,8 @@
             emscripten
             git
             libxml2
-            llvmPackages_16.bintools
-            llvmPackages_16.clang
+            llvmPackages_18.bintools
+            llvmPackages_18.clang
             ninja
             python3
             zlib

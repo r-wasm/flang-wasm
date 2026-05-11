@@ -9,11 +9,12 @@ WASM = $(PREFIX)/wasm
 FLANG_BIN = $(BUILD)/bin/flang
 FLANG_INCLUDE = $(BUILD)/include/flang
 
-RUNTIME_SOURCES := $(wildcard $(SOURCE)/flang/runtime/*.cpp)
+RUNTIME_SOURCES := $(wildcard $(SOURCE)/flang-rt/lib/runtime/*.cpp)
 RUNTIME_SOURCES += $(SOURCE)/flang/lib/Decimal/decimal-to-binary.cpp
 RUNTIME_SOURCES += $(SOURCE)/flang/lib/Decimal/binary-to-decimal.cpp
 RUNTIME_OBJECTS = $(patsubst $(SOURCE)/%,$(BUILD)/%,$(RUNTIME_SOURCES:.cpp=.o))
 RUNTIME_LIB = $(BUILD)/flang/runtime/libFortranRuntime.a
+RUNTIME_CONFIG = $(BUILD)/tools/flang/runtime/config.h
 
 FLANG_WASM_CMAKE_VARS := $(FLANG_WASM_CMAKE_VARS)
 
@@ -40,23 +41,30 @@ $(FLANG_BIN): $(SOURCE)
 	  -DLLVM_TARGETS_TO_BUILD="WebAssembly" \
 	  -DLLVM_ENABLE_PROJECTS="clang;flang;mlir" \
 	  -DFLANG_INCLUDE_TESTS=OFF \
+	  -DFLANG_ENABLE_FLANG_RT=OFF \
 	  $(FLANG_WASM_CMAKE_VARS)
 	TERM=dumb cmake --build $(BUILD)
 	$(MAKE) wasm-runtime
 
 RUNTIME_CXXFLAGS := $(RUNTIME_CXXFLAGS)
 RUNTIME_CXXFLAGS += -I$(BUILD)/include -I$(BUILD)/tools/flang/runtime
-RUNTIME_CXXFLAGS += -I$(SOURCE)/flang/include -I$(SOURCE)/llvm/include
+RUNTIME_CXXFLAGS += -I$(SOURCE)/flang/include -I$(SOURCE)/flang-rt/include
+RUNTIME_CXXFLAGS += -I$(SOURCE)/llvm/include
 RUNTIME_CXXFLAGS += -DFLANG_LITTLE_ENDIAN
 RUNTIME_CXXFLAGS += -fPIC -Wno-c++11-narrowing -fvisibility=hidden
 RUNTIME_CXXFLAGS += -DFE_UNDERFLOW=0 -DFE_OVERFLOW=0 -DFE_INEXACT=0
 RUNTIME_CXXFLAGS += -DFE_INVALID=0 -DFE_DIVBYZERO=0 -DFE_ALL_EXCEPT=0
 
+$(RUNTIME_CONFIG):
+	@mkdir -p $(@D)
+	@printf '#ifndef FORTRAN_RUNTIME_CONFIG_H\n#define FORTRAN_RUNTIME_CONFIG_H\n#define HAVE_STRERROR_R 1\n#define HAVE_DECL_STRERROR_S 0\n/* #undef HAVE_BACKTRACE */\n#endif\n' > $@
+
 $(RUNTIME_LIB): $(RUNTIME_OBJECTS)
+	@mkdir -p $(@D)
 	@rm -f $@
 	emar -rcs $@ $^
 
-$(BUILD)%.o : $(SOURCE)%.cpp
+$(BUILD)%.o : $(SOURCE)%.cpp $(RUNTIME_CONFIG)
 	@mkdir -p $(@D)
 	em++ $(RUNTIME_CXXFLAGS) -o $@ -c $<
 
