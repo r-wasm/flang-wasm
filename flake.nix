@@ -21,7 +21,7 @@
               url = "https://github.com/r-wasm/llvm-project";
               # This is the tip of the wasm branch.
               rev = "e3da0a873ea32bca563c2cccdd4d7622b13cef50";
-              hash = "sha256-2QY7/cdtLkSfjTQ/XrTYGtEp6uoqzt/5Is8GF2JRX2A=";
+              hash = "sha256-q9KVaV51GRxVCwt/7ZO2QuxfY22btFsLGBmxO7t2gHw=";
             };
           });
 
