@@ -85,6 +85,10 @@ check:
 clean:
 	cmake --build $(BUILD) --target clean
 
+.PHONY: clean-runtime
+clean-runtime:
+	rm -f $(RUNTIME_OBJECTS)
+
 .PHONY: clean-all
 clean-all:
 	rm -rf $(SOURCE) $(BUILD)
