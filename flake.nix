@@ -20,8 +20,8 @@
             flang-source = nixpkgs.legacyPackages.${system}.fetchgit {
               url = "https://github.com/r-wasm/llvm-project";
               # This is the tip of the wasm branch.
-              rev = "0d8c5b06667caafe598c500ceca14bd175bc8e95";
-              hash = "sha256-MT4PXTAeGnNHqD1s6Dh3FiTVFuvHv3MR8NC2u4eARq8=";
+              rev = "7ca73ca1ab129c86e63fd3a25aaa58bbf4b5d88c";
+              hash = "sha256-7VVt7JoNqmTFAMDZQZlPO5u0Jt8ZByj7rmtXjijcR3E=";
             };
           });
 
