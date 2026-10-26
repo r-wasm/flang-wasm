@@ -11,13 +11,8 @@ LLD_BIN = $(BUILD)/bin/lld
 FLANG_INCLUDE = $(BUILD)/include/flang
 EMSCRIPTEN_LLVM_ROOT = $(shell em-config LLVM_ROOT)
 
-RUNTIME_SOURCES := $(wildcard $(SOURCE)/flang-rt/lib/runtime/*.cpp)
-RUNTIME_SOURCES := $(filter-out %/io-api-gpu.cpp %/io-stmt-minimal.cpp %/trampoline.cpp,$(RUNTIME_SOURCES))
-RUNTIME_SOURCES += $(SOURCE)/flang/lib/Decimal/decimal-to-binary.cpp
-RUNTIME_SOURCES += $(SOURCE)/flang/lib/Decimal/binary-to-decimal.cpp
-RUNTIME_OBJECTS = $(patsubst $(SOURCE)/%,$(BUILD)/%,$(RUNTIME_SOURCES:.cpp=.o))
-RUNTIME_LIB = $(BUILD)/flang/runtime/libFortranRuntime.a
-RUNTIME_CONFIG = $(BUILD)/tools/flang/runtime/config.h
+RUNTIME_BUILD = $(BUILD)/runtimes
+RUNTIME_TRIPLE = wasm32-unknown-emscripten
 
 FLANG_WASM_CMAKE_VARS := $(FLANG_WASM_CMAKE_VARS)
 
@@ -28,7 +23,17 @@ all: flang wasm-runtime
 download: $(SOURCE)
 
 .PHONY: wasm-runtime
-wasm-runtime: $(RUNTIME_LIB)
+wasm-runtime: $(FLANG_BIN)
+	emcmake cmake -G Ninja -S $(SOURCE)/runtimes -B $(RUNTIME_BUILD) \
+	  -DCMAKE_BUILD_TYPE=MinSizeRel \
+	  -DLLVM_BINARY_DIR=$(BUILD) \
+	  -DLLVM_ENABLE_RUNTIMES=flang-rt \
+	  -DLLVM_DEFAULT_TARGET_TRIPLE=$(RUNTIME_TRIPLE) \
+	  -DCMAKE_Fortran_COMPILER=$(FLANG_BIN) \
+	  -DCMAKE_Fortran_COMPILER_WORKS=yes \
+	  -DFLANG_RT_INCLUDE_TESTS=OFF \
+	  -DFLANG_RT_FORTRAN_MODULES=ON
+	TERM=dumb cmake --build $(RUNTIME_BUILD)
 
 $(SOURCE):
 	git clone --single-branch -b wasm --depth=1 https://github.com/r-wasm/llvm-project
@@ -49,31 +54,8 @@ $(FLANG_BIN): $(SOURCE)
 	TERM=dumb cmake --build $(BUILD)
 	$(MAKE) wasm-runtime
 
-RUNTIME_CXXFLAGS := $(RUNTIME_CXXFLAGS)
-RUNTIME_CXXFLAGS += -I$(BUILD)/include -I$(BUILD)/tools/flang/runtime
-RUNTIME_CXXFLAGS += -I$(SOURCE)/flang/include -I$(SOURCE)/flang-rt/include
-RUNTIME_CXXFLAGS += -I$(SOURCE)/llvm/include
-RUNTIME_CXXFLAGS += -isystem $(SOURCE)/libc -DLIBC_NAMESPACE=__llvm_libc_common_utils
-RUNTIME_CXXFLAGS += -DFLANG_LITTLE_ENDIAN
-RUNTIME_CXXFLAGS += -fPIC -Wno-c++11-narrowing -fvisibility=hidden
-RUNTIME_CXXFLAGS += -DFE_UNDERFLOW=0 -DFE_OVERFLOW=0 -DFE_INEXACT=0
-RUNTIME_CXXFLAGS += -DFE_INVALID=0 -DFE_DIVBYZERO=0 -DFE_ALL_EXCEPT=0
-
-$(RUNTIME_CONFIG):
-	@mkdir -p $(@D)
-	@printf '#ifndef FORTRAN_RUNTIME_CONFIG_H\n#define FORTRAN_RUNTIME_CONFIG_H\n#define HAVE_STRERROR_R 1\n#define HAVE_DECL_STRERROR_S 0\n/* #undef HAVE_BACKTRACE */\n#endif\n' > $@
-
-$(RUNTIME_LIB): $(RUNTIME_OBJECTS)
-	@mkdir -p $(@D)
-	@rm -f $@
-	emar -rcs $@ $^
-
-$(BUILD)%.o : $(SOURCE)%.cpp $(RUNTIME_CONFIG)
-	@mkdir -p $(@D)
-	em++ $(RUNTIME_CXXFLAGS) -o $@ -c $<
-
 .PHONY: install
-install: $(FLANG_BIN) $(RUNTIME_LIB)
+install: $(FLANG_BIN) wasm-runtime
 	mkdir -p $(HOST)/bin
 	mkdir -p $(HOST)/llvm/bin
 	mkdir -p $(HOST)/include/flang
@@ -83,7 +65,8 @@ install: $(FLANG_BIN) $(RUNTIME_LIB)
 	rm -f $(HOST)/llvm/bin/lld $(HOST)/llvm/bin/wasm-ld
 	install -m 755 $(LLD_BIN) $(HOST)/llvm/bin
 	ln -sf lld $(HOST)/llvm/bin/wasm-ld
-	install -m 644 $(RUNTIME_LIB) $(WASM)/lib
+	install -m 644 $(RUNTIME_BUILD)/lib/clang/*/lib/$(RUNTIME_TRIPLE)/libflang_rt.runtime.a $(WASM)/lib/libFortranRuntime.a
+	install -m 644 $(RUNTIME_BUILD)/lib/clang/*/finclude/flang/$(RUNTIME_TRIPLE)/*.mod $(HOST)/include/flang
 	find $(FLANG_INCLUDE) -type f -exec install -m 644 {} $(HOST)/include/flang ';'
 
 .PHONY: check
@@ -96,7 +79,7 @@ clean:
 
 .PHONY: clean-runtime
 clean-runtime:
-	rm -f $(RUNTIME_OBJECTS)
+	rm -rf $(RUNTIME_BUILD)
 
 .PHONY: clean-all
 clean-all:
