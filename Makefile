@@ -10,6 +10,7 @@ FLANG_BIN = $(BUILD)/bin/flang
 FLANG_INCLUDE = $(BUILD)/include/flang
 
 RUNTIME_SOURCES := $(wildcard $(SOURCE)/flang-rt/lib/runtime/*.cpp)
+RUNTIME_SOURCES := $(filter-out %/io-api-gpu.cpp %/io-stmt-minimal.cpp %/trampoline.cpp,$(RUNTIME_SOURCES))
 RUNTIME_SOURCES += $(SOURCE)/flang/lib/Decimal/decimal-to-binary.cpp
 RUNTIME_SOURCES += $(SOURCE)/flang/lib/Decimal/binary-to-decimal.cpp
 RUNTIME_OBJECTS = $(patsubst $(SOURCE)/%,$(BUILD)/%,$(RUNTIME_SOURCES:.cpp=.o))
@@ -50,6 +51,7 @@ RUNTIME_CXXFLAGS := $(RUNTIME_CXXFLAGS)
 RUNTIME_CXXFLAGS += -I$(BUILD)/include -I$(BUILD)/tools/flang/runtime
 RUNTIME_CXXFLAGS += -I$(SOURCE)/flang/include -I$(SOURCE)/flang-rt/include
 RUNTIME_CXXFLAGS += -I$(SOURCE)/llvm/include
+RUNTIME_CXXFLAGS += -isystem $(SOURCE)/libc -DLIBC_NAMESPACE=__llvm_libc_common_utils
 RUNTIME_CXXFLAGS += -DFLANG_LITTLE_ENDIAN
 RUNTIME_CXXFLAGS += -fPIC -Wno-c++11-narrowing -fvisibility=hidden
 RUNTIME_CXXFLAGS += -DFE_UNDERFLOW=0 -DFE_OVERFLOW=0 -DFE_INEXACT=0
