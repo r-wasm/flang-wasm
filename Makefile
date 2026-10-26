@@ -7,7 +7,9 @@ HOST = $(PREFIX)/host
 WASM = $(PREFIX)/wasm
 
 FLANG_BIN = $(BUILD)/bin/flang
+LLD_BIN = $(BUILD)/bin/lld
 FLANG_INCLUDE = $(BUILD)/include/flang
+EMSCRIPTEN_LLVM_ROOT = $(shell em-config LLVM_ROOT)
 
 RUNTIME_SOURCES := $(wildcard $(SOURCE)/flang-rt/lib/runtime/*.cpp)
 RUNTIME_SOURCES := $(filter-out %/io-api-gpu.cpp %/io-stmt-minimal.cpp %/trampoline.cpp,$(RUNTIME_SOURCES))
@@ -40,7 +42,7 @@ $(FLANG_BIN): $(SOURCE)
 	  -DCMAKE_BUILD_TYPE=MinSizeRel \
 	  -DLLVM_DEFAULT_TARGET_TRIPLE="wasm32-unknown-emscripten" \
 	  -DLLVM_TARGETS_TO_BUILD="WebAssembly" \
-	  -DLLVM_ENABLE_PROJECTS="clang;flang;mlir" \
+	  -DLLVM_ENABLE_PROJECTS="clang;flang;mlir;lld" \
 	  -DFLANG_INCLUDE_TESTS=OFF \
 	  -DFLANG_ENABLE_FLANG_RT=OFF \
 	  $(FLANG_WASM_CMAKE_VARS)
@@ -73,9 +75,14 @@ $(BUILD)%.o : $(SOURCE)%.cpp $(RUNTIME_CONFIG)
 .PHONY: install
 install: $(FLANG_BIN) $(RUNTIME_LIB)
 	mkdir -p $(HOST)/bin
+	mkdir -p $(HOST)/llvm/bin
 	mkdir -p $(HOST)/include/flang
 	mkdir -p $(WASM)/lib
 	install -m 755 $(FLANG_BIN) $(HOST)/bin
+	ln -sf $(EMSCRIPTEN_LLVM_ROOT)/* $(HOST)/llvm/bin
+	rm -f $(HOST)/llvm/bin/lld $(HOST)/llvm/bin/wasm-ld
+	install -m 755 $(LLD_BIN) $(HOST)/llvm/bin
+	ln -sf lld $(HOST)/llvm/bin/wasm-ld
 	install -m 644 $(RUNTIME_LIB) $(WASM)/lib
 	find $(FLANG_INCLUDE) -type f -exec install -m 644 {} $(HOST)/include/flang ';'
 

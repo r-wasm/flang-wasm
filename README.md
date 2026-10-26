@@ -4,7 +4,7 @@ This repository contains tools to build a patched version of [LLVM's](https://ll
 
 ## What's included
 
-* A `Makefile` that downloads, builds and installs the `flang` compiler from a [patched LLVM](https://github.com/r-wasm/llvm-project) source. Use the `PREFIX` make variable to control the installation directory (default, `"."`). Once installed, the `$(PREFIX)/host/bin/` directory will contain `flang`. The `$(PREFIX)/wasm/` directory will contain a pre-built Fortran runtime library compiled for WebAssembly, for use with Emscripten.
+* A `Makefile` that downloads, builds and installs the `flang` compiler from a [patched LLVM](https://github.com/r-wasm/llvm-project) source. Use the `PREFIX` make variable to control the installation directory (default, `"."`). Once installed, the `$(PREFIX)/host/bin/` directory will contain `flang`. The `$(PREFIX)/host/llvm/bin/` directory will contain Emscripten's LLVM tools with `wasm-ld` replaced by the patched version, for use as `EM_LLVM_ROOT`. The `$(PREFIX)/wasm/` directory will contain a pre-built Fortran runtime library compiled for WebAssembly, for use with Emscripten.
 
 * A `Dockerfile`, which can be used to build a Docker container with LLVM Flang and the WebAssembly Fortran runtime library installed under the directory `/opt/flang`.
 
